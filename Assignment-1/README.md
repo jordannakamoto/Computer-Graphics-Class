@@ -5,6 +5,8 @@ I am interested in perhaps creating a 3D simulation of sprinkler or irrigation s
 
 Here is some code analysis from ChatGPT about the implementation of the water physics.
 
+---
+### From ChatGPT:
 In the shader script provided, the water simulation is not a particle-based system but rather a procedurally generated effect using ray marching and mathematical functions to mimic the behavior of a flowing and rippling water body. Let’s break down the basic physics and techniques used to simulate the water body.
 
 ### General Approach to Water Simulation
