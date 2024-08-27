@@ -1,4 +1,4 @@
-# CS460 Computer Graphics
+# CS375 Computer Graphics
 Sonoma State University\
 Professor Dave Shreiner
 
