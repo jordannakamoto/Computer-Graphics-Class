@@ -1,9 +1,13 @@
 // Jordan Project 2
-// ... I can't figure out how to get the tetras to initialize their rotations in different directions
+// TODO: Figure out how to get the tetras to initialize their rotations in different directions
+//  - I thought selfRot was doing this but I don't know why it isn't
+
+// Features:
+// Some procedural jitter for the tetra array
 
 const ms = new MatrixStack()
 
-// rotation counters
+// rotation counters for spheres
 let gl
 let r1 = 0, r2 = 0, r3 = 0
 
@@ -41,22 +45,23 @@ function init() {
     // Disperse the Tetras
     for (let i = 0; i < numTetras; i++) {
         let scale = Math.random() * 0.10 + 0.01,
-            rotAx = [Math.random(), Math.random(), Math.random()],
-            secondaryRot = [Math.random() * Math.PI * 2, Math.random() * Math.PI * 2, Math.random() * Math.PI * 2],
-            color = vec4(
-                clamp(Math.random() * 0.3 + 0.1, 0.1, 0.2),
-                clamp(Math.random() * 0.1 + 0.05, 0.05, 0.15),
-                clamp(Math.random() * 0.5 + 0.1, 0.1, 0.6),
-                1.0
-            ),
-            theta = Math.random() * 2 * Math.PI,
-            phi = Math.random() * Math.PI,
-            orbitR = Math.random() * 0.4 + 0.3;
-
-        if (!isValidVector(rotAx)) rotAx = [1, 0, 0];
+        // This should be for tetras spinning on their own axis, but I didn't do it right
+        rotAx = [Math.random(), Math.random(), Math.random()],
+        selfRot = [Math.random() * Math.PI * 2, Math.random() * Math.PI * 2, Math.random() * Math.PI * 2],
+        // randomize the color in a blue-purple range
+        color = vec4(
+            clamp(Math.random() * 0.3 + 0.1, 0.1, 0.2),
+            clamp(Math.random() * 0.1 + 0.05, 0.05, 0.15),
+            clamp(Math.random() * 0.5 + 0.1, 0.1, 0.6),
+            1.0
+        ),
+        // These values are for translating the tetra around the spheres in an orbital manner
+        theta = Math.random() * 2 * Math.PI,
+        phi = Math.random() * Math.PI,
+        orbitR = Math.random() * 0.4 + 0.3;
 
         tetras.push({
-            scale, rotAx, secondaryRot, color, theta, phi, orbitR,
+            scale, rotAx, selfRot, color, theta, phi, orbitR,
             orbitS: Math.random() * 0.2 + 0.05,
             jitter: [0, 0, 0], targetJ: [0, 0, 0],
             jitterRot: [0, 0, 0], targetJR: [0, 0, 0]
@@ -69,13 +74,15 @@ function init() {
 // [RENDER]
 // ============================================================ //
 function render() {
-    // for introducing jitter sequence
+    // time interval for new jitter generation
     const currentTime = performance.now();
     const elapsedTime = currentTime - lastJitterTime;
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    // For our 3 spheres, the matrix stack order is the same
+    // SPHERES
+
+    // For the 3 spheres, the matrix stack operation/order is the same
     function sphereStackEffect(sphere, trans, scale, rot, color) {
         ms.push(); 
         ms.translate(...trans); 
@@ -93,7 +100,7 @@ function render() {
     sphereStackEffect(sphere3, [.25, 0, 0], .55, r3, vec4(0.1, 0.1, 0.1, 1));
     r3 += 0.1;
 
-    // draw the axes
+    // AXES, shares rotation with sphere 2
     ms.push(); 
     ms.translate(.25, 0, 0); 
     ms.scale(.72); 
@@ -102,13 +109,16 @@ function render() {
     ax.draw(); 
     ms.pop();
 
-    // draw the tetras and apply the jitter
+    // apply the jitter (translate and rotate) along with the main orbit rotation
     tetras.forEach(t => {
         let theta = t.theta + t.orbitS * rTetra;
         let phi = t.phi;
         let ox = t.orbitR * Math.sin(phi) * Math.cos(theta);
         let oy = t.orbitR * Math.cos(phi);
         let oz = t.orbitR * Math.sin(phi) * Math.sin(theta);
+
+        // listen to time interval and
+        // apply translate jitter 
 
         if (elapsedTime > jitterInterval) {
             t.targetJ = [Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5].map(x => clamp(x * jMag, -jMag, jMag));
@@ -120,11 +130,16 @@ function render() {
 
         ms.push();
         ms.translate(ox + t.jitter[0], oy + t.jitter[1], oz + t.jitter[2]);
+
+        // apply scale and self rotation  -------------------------------------------------- //
+
         ms.scale(t.scale);
 
-        ms.rotate(t.secondaryRot[0], [1, 0, 0]);
-        ms.rotate(t.secondaryRot[1], [0, 1, 0]);
-        ms.rotate(t.secondaryRot[2], [0, 0, 1]);
+        ms.rotate(t.selfRot[0], [1, 0, 0]);
+        ms.rotate(t.selfRot[1], [0, 1, 0]);
+        ms.rotate(t.selfRot[2], [0, 0, 1]);
+        
+        // now apply rotation jitter ------------------------------------------------------- //
 
         t.jitterRot = t.jitterRot.map((jr, i) => lerp(jr, t.targetJR[i], jSpeed));
 
