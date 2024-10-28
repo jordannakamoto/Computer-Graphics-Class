@@ -5,6 +5,22 @@
 
 'use strict;'
 
+function generateUniqueColors(numColors) {
+    const colors = new Set();
+    while (colors.size < numColors) {
+        const color = [
+            Math.random(), // Red
+            Math.random(), // Green
+            Math.random(), // Blue
+            1.0            // Alpha
+        ];
+        // Convert color to a string to ensure uniqueness in the set
+        colors.add(color.join(','));
+    }
+    // Convert back to Float32Array after uniqueness is ensured
+    return new Float32Array([...colors].flatMap(color => color.split(',').map(Number)));
+}
+
 class ShaderProgram {
     constructor(gl, object, vertexShader, fragmentShader) {
         let program = initShaders(gl, vertexShader, fragmentShader);
