@@ -1,5 +1,5 @@
 ## Screenshot
-![Screenshot of the Project](screenshot.png)
+<img src="screenshot.png" alt="Screenshot of the Project" width="50%">
 
 ## Project Overview
 
@@ -10,13 +10,13 @@ This tool simulates a lunar rover environment to program obstacle detection and 
 - Navigation recommendations based on simulation data
 - Realistic modeling of rocks and holes
 - Lighting and texture realism
-- Integration of animations (to be determined)
+- Animations (the environment is kinda static so I'm not sure what to choose for this yet)
 
 ---
 
 ## Project Schedule
 
-I have already done some work on the project, so I expect the following timeline:
+Based on the project's current state, I expect the following timeline:
 
 ### Week 1
 - Further develop the realism of the environment.
